@@ -32,10 +32,11 @@ yes '' | gitlab-runner register \
     --executor docker \
     --name "runner" \
     --output-limit "20480" \
+    --tag-list "docker" \
     --docker-image "docker:latest" \
-    --docker-volumes /root/m2:/root/.m2 \
-    --docker-volumes /var/run/docker.sock:/var/run/docker.sock \
-    --docker-extra-hosts ${GITLAB_HOST}:${GITLAB_IP}
+    --docker-volumes /var/run/docker.sock:/var/run/docker.sock
+    #--docker-volumes /root/m2:/root/.m2 \
+    #--docker-extra-hosts ${GITLAB_HOST}:${GITLAB_IP}
 
 # assign runner token
 token=$(cat /etc/gitlab-runner/config.toml | grep token | awk '{print $3}' | tr -d '"')
