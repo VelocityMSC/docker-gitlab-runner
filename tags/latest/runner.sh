@@ -54,8 +54,8 @@ yes '' | gitlab-runner register \
     --cache-s3-access-key ${s3_access_key} \
     --cache-s3-secret-key ${s3_secret_key} \
     --cache-s3-bucket-name "runner" \
-    --cache-s3-insecure true \
-    --cache-cache-shared true
+    --cache-s3-insecure \
+    --cache-cache-shared
 
 # /etc/gitlab-runner/config.toml is dynamically generated from the arguments specified during runner registration
 
