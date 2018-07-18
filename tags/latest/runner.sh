@@ -13,8 +13,8 @@ fi
 # We utilize Docker secrets for sensitive info here
 docker_secrets_dir="/var/run/secrets"
 gitlab_access_token=$(<"${docker_secrets_dir}/gitlab_access_token")
-gitlab_minio_access_key=$(<"${docker_secrets_dir}/gitlab_minio_access_key")
-gitlab_minio_secret_key=$(<"${docker_secrets_dir}/gitlab_minio_secret_key")
+s3_access_key=$(<"${docker_secrets_dir}/s3_access_key")
+s3_secret_key=$(<"${docker_secrets_dir}/s3_secret_key")
 
 # Other variables
 pid=0
@@ -50,9 +50,9 @@ yes '' | gitlab-runner register \
     --output-limit 20480 \
     --tag-list "docker" \
     --cache-type "s3" \
-    --cache-s3-server-address ${s3_host} \
-    --cache-s3-access-key ${gitlab_minio_access_key} \
-    --cache-s3-secret-key ${gitlab_minio_secret_key} \
+    --cache-s3-server-address ${S3_HOST} \
+    --cache-s3-access-key ${s3_access_key} \
+    --cache-s3-secret-key ${s3_secret_key} \
     --cache-s3-bucket-name "runner" \
     --cache-s3-insecure true \
     --cache-cache-shared true
