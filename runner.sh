@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
+
 set -x
 
+# Required Gitlab runner options
+
+if ! [[ ${CI_SERVER_URL} =~ ^https?:// ]]; then
+    gitlab_host=http://${CI_SERVER_URL}
+else
+    gitlab_host=${CI_SERVER_URL}
+fi
+
+# Other variables
 pid=0
 token=()
-
-if ! [[ $GITLAB_HOST =~ ^https?:// ]]; then
-    gitlab_service_url=http://${GITLAB_HOST}
-else
-    gitlab_service_url=${GITLAB_HOST}
-fi
 
 # SIGTERM-handler
 term_handler() {
@@ -17,7 +21,8 @@ term_handler() {
         wait "$pid"
     fi
 
-    gitlab-runner unregister -u ${gitlab_service_url} -t ${token}
+    gitlab-runner unregister -u ${gitlab_host} -t ${token}
+
     exit 143; # 128 + 15 -- SIGTERM
 }
 
@@ -25,21 +30,32 @@ term_handler() {
 # on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
 trap 'kill ${!}; term_handler' SIGTERM
 
+# TODO: Make runner options a bit more dynamic
+
 # register runner
 yes '' | gitlab-runner register \
-    --url ${gitlab_service_url} \
-    --registration-token ${GITLAB_RUNNER_TOKEN} \
-    --executor docker \
-    --name "runner" \
-    --output-limit "20480" \
-    --tag-list "docker" \
+    -u "${gitlab_host}" \
+    -r "${REGISTRATION_TOKEN}" \
+    --executor "docker" \
     --docker-image "docker:latest" \
-    --docker-volumes /var/run/docker.sock:/var/run/docker.sock
-    #--docker-volumes /root/m2:/root/.m2 \
-    #--docker-extra-hosts ${GITLAB_HOST}:${GITLAB_IP}
+    --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
+    --name "runner" \
+    --output-limit 20480 \
+    --tag-list "docker" \
+    --cache-type "s3" \
+    --cache-s3-server-address ${S3_SERVER_ADDRESS} \
+    --cache-s3-access-key ${S3_ACCESS_KEY} \
+    --cache-s3-secret-key ${S3_SECRET_KEY} \
+    --cache-s3-bucket-name "runner" \
+    --cache-s3-insecure true \
+    --cache-cache-shared true
 
-# assign runner token
-token=$(cat /etc/gitlab-runner/config.toml | grep token | awk '{print $3}' | tr -d '"')
+# /etc/gitlab-runner/config.toml is dynamically generated from the arguments specified during runner registration
+
+# Assign runner token
+# Old line was commented out, because we don't kill cats. :)
+#token=$(cat /etc/gitlab-runner/config.toml | grep token | awk '{print $3}' | tr -d '"')
+token=$(grep token "/etc/gitlab-runner/config.toml" | awk '{print $3}' | tr -d '"')
 
 # run multi-runner
 gitlab-ci-multi-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner & pid="$!"
