@@ -4,11 +4,17 @@ set -x
 
 # Required Gitlab runner options
 
-if ! [[ ${CI_SERVER_URL} =~ ^https?:// ]]; then
-    gitlab_host=http://${CI_SERVER_URL}
+if ! [[ ${GITLAB_HOST} =~ ^https?:// ]]; then
+    gitlab_host=http://${GITLAB_HOST}
 else
-    gitlab_host=${CI_SERVER_URL}
+    gitlab_host=${GITLAB_HOST}
 fi
+
+# We utilize Docker secrets for sensitive info here
+docker_secrets_dir="/var/run/secrets"
+gitlab_access_token=$(<"${docker_secrets_dir}/gitlab_access_token")
+gitlab_minio_access_key=$(<"${docker_secrets_dir}/gitlab_minio_access_key")
+gitlab_minio_secret_key=$(<"${docker_secrets_dir}/gitlab_minio_secret_key")
 
 # Other variables
 pid=0
@@ -32,10 +38,11 @@ trap 'kill ${!}; term_handler' SIGTERM
 
 # TODO: Make runner options a bit more dynamic
 
+
 # register runner
 yes '' | gitlab-runner register \
     -u "${gitlab_host}" \
-    -r "${REGISTRATION_TOKEN}" \
+    -r "${gitlab_access_token}" \
     --executor "docker" \
     --docker-image "docker:latest" \
     --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
@@ -43,9 +50,9 @@ yes '' | gitlab-runner register \
     --output-limit 20480 \
     --tag-list "docker" \
     --cache-type "s3" \
-    --cache-s3-server-address ${S3_SERVER_ADDRESS} \
-    --cache-s3-access-key ${S3_ACCESS_KEY} \
-    --cache-s3-secret-key ${S3_SECRET_KEY} \
+    --cache-s3-server-address ${s3_host} \
+    --cache-s3-access-key ${gitlab_minio_access_key} \
+    --cache-s3-secret-key ${gitlab_minio_secret_key} \
     --cache-s3-bucket-name "runner" \
     --cache-s3-insecure true \
     --cache-cache-shared true
