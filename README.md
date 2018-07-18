@@ -4,7 +4,7 @@ https://hub.docker.com/r/velocityorg/docker-gitlab-runner/
 Gitlab runner that uses Docker swarm with S3/Minio distributed cache server support
 
 ## Supported tags and respective `Dockerfile` links
-- [`latest` (*latest/Dockerfile*)](https://github.com/velocityorg/docker-gitlab-runner/blob/master/latest/Dockerfile)
+- [`latest` (*tags/latest/Dockerfile*)](https://github.com/velocityorg/docker-gitlab-runner/blob/master/tags/latest/Dockerfile)
 
 ## Required environment variables
 - `CI_SERVER_URL` Hostname/IP address:port of your Gitlab server
