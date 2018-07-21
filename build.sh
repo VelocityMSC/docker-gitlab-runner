@@ -2,7 +2,7 @@
 
 function usage() {
     echo -e "Syntax: $(basename $0) -t <tag>"
-    echo -e "See the tags/ directory for a list of valid tags"
+    echo -e "See the project directory for a list of valid tags"
 }
 
 while getopts :t: opt; do
@@ -31,8 +31,8 @@ done
 shift $(($OPTIND - 1))
 
 if [[ -n ${tag} ]]; then
-    if [[ -d "tags/${tag}" ]]; then
-        docker build --compress -t "velocityorg/docker-gitlab-runner:${tag}" "tags/${tag}/"
+    if [[ -d "${tag}" && "${tag}" =~ ^[0-9]|latest ]]; then
+        docker build --compress -t "velocityorg/docker-gitlab-runner:${tag}" "${tag}/"
     else
         usage; echo
         >&2 echo "\"${tag}\" isn't a valid tag"
