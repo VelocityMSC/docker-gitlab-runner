@@ -17,7 +17,9 @@ token=()
 if [[ -n ${CI_SERVER_URL} ]]; then
     # Fix Gitlab server URL by prepending a scheme if none specified
     if ! [[ ${CI_SERVER_URL} =~ "https?://" ]]; then
-        CI_SERVER_URL="http://${CI_SERVER_URL}"
+        export CI_SERVER_URL="http://${CI_SERVER_URL}"
+    else
+        export CI_SERVER_URL="${CI_SERVER_URL}"
     fi
 else
     exit 1
@@ -26,15 +28,15 @@ fi
 # Set default environment vars/runner options
 
 if [[ -z ${DOCKER_IMAGE} ]]; then
-    DOCKER_IMAGE="docker:latest"
+    export DOCKER_IMAGE="docker:latest"
 fi
 
 if [[ -z ${DOCKER_VOLUMES} ]]; then
-    DOCKER_VOLUMES="/var/run/docker.sock:/var/run/docker.sock"
+    export DOCKER_VOLUMES="/var/run/docker.sock:/var/run/docker.sock"
 fi
 
 if [[ -z ${RUNNER_EXECUTOR} ]]; then
-    RUNNER_EXECUTOR="docker"
+    export RUNNER_EXECUTOR="docker"
 fi
 
 ########################################################################
@@ -69,9 +71,17 @@ function term_handler() {
 ########################################################################
 
 # Docker secrets
-[[ -r "${secrets_dir}/gitlab_registration_token" ]] && REGISTRATION_TOKEN=$(<"${secrets_dir}/gitlab_registration_token")
-[[ -r "${secrets_dir}/s3_access_key" ]] && S3_ACCESS_KEY=$(<"${secrets_dir}/s3_access_key")
-[[ -r "${secrets_dir}/s3_secret_key" ]] && S3_SECRET_KEY=$(<"${secrets_dir}/s3_secret_key")
+if [[ -r "${secrets_dir}/gitlab_registration_token" ]]; then
+    export REGISTRATION_TOKEN=$(<"${secrets_dir}/gitlab_registration_token")
+fi
+
+if [[ -r "${secrets_dir}/s3_access_key" ]]; then
+    export S3_ACCESS_KEY=$(<"${secrets_dir}/s3_access_key")
+fi
+
+if [[ -r "${secrets_dir}/s3_secret_key" ]]; then
+    export S3_SECRET_KEY=$(<"${secrets_dir}/s3_secret_key")
+fi
 
 # setup handlers
 # on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
