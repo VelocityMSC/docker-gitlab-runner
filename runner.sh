@@ -69,7 +69,7 @@ function term_handler() {
 ########################################################################
 
 # Docker secrets
-[[ -r "${secrets_dir}/gitlab_access_token" ]] && REGISTRATION_TOKEN=$(<"${secrets_dir}/gitlab_registration_token")
+[[ -r "${secrets_dir}/gitlab_registration_token" ]] && REGISTRATION_TOKEN=$(<"${secrets_dir}/gitlab_registration_token")
 [[ -r "${secrets_dir}/s3_access_key" ]] && S3_ACCESS_KEY=$(<"${secrets_dir}/s3_access_key")
 [[ -r "${secrets_dir}/s3_secret_key" ]] && S3_SECRET_KEY=$(<"${secrets_dir}/s3_secret_key")
 
