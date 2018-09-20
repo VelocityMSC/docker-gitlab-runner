@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -x
 
@@ -25,9 +25,17 @@ fi
 
 # Set default environment vars/runner options
 
-[[ -z "${DOCKER_IMAGE}" ]] && DOCKER_IMAGE="docker:latest"
-[[ -z "${DOCKER_VOLUMES}" ]] && DOCKER_VOLUMES="/var/run/docker.sock:/var/run/docker.sock"
-[[ -z "${RUNNER_EXECUTOR}" ]] && RUNNER_EXECUTOR="docker"
+if [[ -z ${DOCKER_IMAGE} ]]; then
+    DOCKER_IMAGE="docker:latest"
+fi
+
+if [[ -z ${DOCKER_VOLUMES} ]]; then
+    DOCKER_VOLUMES="/var/run/docker.sock:/var/run/docker.sock"
+fi
+
+if [[ -z ${RUNNER_EXECUTOR} ]]; then
+    RUNNER_EXECUTOR="docker"
+fi
 
 ########################################################################
 #                                                                      #
