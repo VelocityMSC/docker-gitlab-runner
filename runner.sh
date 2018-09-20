@@ -2,72 +2,88 @@
 
 set -x
 
-# Required Gitlab runner options
+# SETTINGS #############################################################
 
-if ! [[ ${GITLAB_HOST} =~ ^https?:// ]]; then
-    gitlab_host=http://${GITLAB_HOST}
-else
-    gitlab_host=${GITLAB_HOST}
-fi
+# Directory where Docker secrets are stored
+secrets_dir="/var/run/secrets"
 
-# We utilize Docker secrets for sensitive info here
-docker_secrets_dir="/var/run/secrets"
-gitlab_access_token=$(<"${docker_secrets_dir}/gitlab_access_token")
-s3_access_key=$(<"${docker_secrets_dir}/s3_access_key")
-s3_secret_key=$(<"${docker_secrets_dir}/s3_secret_key")
-
-# Other variables
+# Other vars
+# You shouldn't change these unless you know what you're doing
 pid=0
 token=()
 
+# ENVIRONMENT CHECK ####################################################
+
+if [[ -n ${CI_SERVER_URL} ]]; then
+    # Fix Gitlab server URL by prepending a scheme if none specified
+    if ! [[ ${CI_SERVER_URL} =~ "https?://" ]]; then
+        CI_SERVER_URL="http://${CI_SERVER_URL}"
+    fi
+else
+    exit 1
+fi
+
+# Set default environment vars/runner options
+
+[[ -z "${DOCKER_IMAGE}" ]] && DOCKER_IMAGE="docker:latest"
+[[ -z "${DOCKER_VOLUMES}" ]] && DOCKER_VOLUMES="/var/run/docker.sock:/var/run/docker.sock"
+[[ -z "${RUNNER_EXECUTOR}" ]] && RUNNER_EXECUTOR="docker"
+
+########################################################################
+#                                                                      #
+#                              FUNCTIONS                               #
+#                                                                      #
+########################################################################
+
+# Gets runner token from config file
+# This is necessary when unregistering the runner
+function get_token () {
+    token=$(grep token "/etc/gitlab-runner/config.toml" | awk '{print $3}' | tr -d '"')
+}
+
 # SIGTERM-handler
-term_handler() {
+# Unregisters Gitlab on process SIGTERM
+function term_handler() {
     if [[ $pid -ne 0 ]]; then
         kill -SIGTERM "$pid"
         wait "$pid"
     fi
 
-    gitlab-runner unregister -u ${gitlab_host} -t ${token}
+    gitlab-runner unregister -u ${CI_SERVER_URL} -t ${token}
 
     exit 143; # 128 + 15 -- SIGTERM
 }
+
+########################################################################
+#                                                                      #
+#                             SCRIPT START                             #
+#                                                                      #
+########################################################################
+
+# Docker secrets
+[[ -r "${secrets_dir}/gitlab_access_token" ]] && REGISTRATION_TOKEN=$(<"${secrets_dir}/gitlab_registration_token")
+[[ -r "${secrets_dir}/s3_access_key" ]] && S3_ACCESS_KEY=$(<"${secrets_dir}/s3_access_key")
+[[ -r "${secrets_dir}/s3_secret_key" ]] && S3_SECRET_KEY=$(<"${secrets_dir}/s3_secret_key")
 
 # setup handlers
 # on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
 trap 'kill ${!}; term_handler' SIGTERM
 
-# TODO: Make runner options a bit more dynamic
+# Register runner in non-interactive mode
+# All options are set via environment variables
+gitlab-runner register -n
 
+# Note: /etc/gitlab-runner/config.toml is dynamically generated from the arguments specified during runner registration
 
-# register runner
-yes '' | gitlab-runner register \
-    -u "${gitlab_host}" \
-    -r "${gitlab_access_token}" \
-    --executor "docker" \
-    --docker-image "docker:latest" \
-    --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
-    --name "runner" \
-    --output-limit 20480 \
-    --tag-list "docker" \
-    --cache-type "s3" \
-    --cache-s3-server-address ${S3_HOST} \
-    --cache-s3-access-key ${s3_access_key} \
-    --cache-s3-secret-key ${s3_secret_key} \
-    --cache-s3-bucket-name "runner" \
-    --cache-cache-shared \
-    #--cache-s3-insecure
-
-# /etc/gitlab-runner/config.toml is dynamically generated from the arguments specified during runner registration
-
-# Assign runner token
-# Old line was commented out, because we don't kill cats. :)
-#token=$(cat /etc/gitlab-runner/config.toml | grep token | awk '{print $3}' | tr -d '"')
-token=$(grep token "/etc/gitlab-runner/config.toml" | awk '{print $3}' | tr -d '"')
+# Set runner token in $token
+#token=$(grep token "/etc/gitlab-runner/config.toml" | awk '{print $3}' | tr -d '"')
+get_token
 
 # run multi-runner
 gitlab-ci-multi-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner & pid="$!"
 
-# wait forever
+# Wait forever
+# When this process ends, send SIGTERM to stop the runner
 while true; do
     tail -f /dev/null & wait ${!}
 done

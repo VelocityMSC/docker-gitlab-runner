@@ -2,7 +2,7 @@
 
 function usage() {
     echo -e "Syntax: $(basename $0) -t <tag>"
-    echo -e "See the project directory for a list of valid tags"
+    echo -e "Set the project directory for a list of valid tags"
 }
 
 while getopts :t: opt; do
