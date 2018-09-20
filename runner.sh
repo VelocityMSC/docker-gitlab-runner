@@ -14,7 +14,7 @@ token=()
 
 # ENVIRONMENT CHECK ####################################################
 
-if [[ ! ${GITLAB_SERVER} =~ "https?\:\/\/" ]]; then
+if ! [[ ${GITLAB_SERVER} =~ ^https?:// ]]; then
     gitlab_server="http://${GITLAB_SERVER}"
 else
     gitlab_server="${GITLAB_SERVER}"
