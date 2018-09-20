@@ -14,12 +14,10 @@ token=()
 
 # ENVIRONMENT CHECK ####################################################
 
-if [[ -n ${CI_SERVER_URL} ]]; then
+if [[ -n ${GITLAB_SERVER} ]]; then
     # Fix Gitlab server URL by prepending a scheme if none specified
-    if ! [[ ${CI_SERVER_URL} =~ "https?://" ]]; then
-        export CI_SERVER_URL="http://${CI_SERVER_URL}"
-    else
-        export CI_SERVER_URL="${CI_SERVER_URL}"
+    if ! [[ ${GITLAB_SERVER} =~ "https?://" ]]; then
+        GITLAB_SERVER="http://${GITLAB_SERVER}"
     fi
 else
     exit 1
@@ -59,7 +57,7 @@ function term_handler() {
         wait "$pid"
     fi
 
-    gitlab-runner unregister -u ${CI_SERVER_URL} -t ${token}
+    gitlab-runner unregister -u ${GITLAB_SERVER} -t ${token}
 
     exit 143; # 128 + 15 -- SIGTERM
 }
@@ -89,7 +87,7 @@ trap 'kill ${!}; term_handler' SIGTERM
 
 # Register runner in non-interactive mode
 # All options are set via environment variables
-gitlab-runner register -n
+gitlab-runner register -n -u ${GITLAB_SERVER}
 
 # Note: /etc/gitlab-runner/config.toml is dynamically generated from the arguments specified during runner registration
 
