@@ -2,9 +2,9 @@ FROM gitlab/gitlab-runner:v11.3.1
 
 MAINTAINER Steven Cook <scook@velocity.org>
 
-RUN apt-get update \
-    && apt-get upgrade \
-    && apt-get install python python-toml
+RUN apt-get -y update \
+    && apt-get -y upgrade \
+    && apt-get -y install python python-toml
 
 COPY runner.sh /
 COPY runner.oy /
