@@ -7,7 +7,7 @@ RUN apt-get -y update \
     && apt-get -y install python python-toml
 
 COPY runner.sh /
-COPY runner.oy /
+COPY runner.py /
 
 RUN chmod +x /runner.sh && chmod +x /runner.py
 
