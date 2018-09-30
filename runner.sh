@@ -92,6 +92,14 @@ gitlab-runner register -n -u ${gitlab_server}
 #token=$(grep token "/etc/gitlab-runner/config.toml" | awk '{print $3}' | tr -d '"')
 get_token
 
+# Add additional settings to config.toml
+cat << EOF >> /etc/gitlab-runner/config.toml
+[session_server]
+  listen_address="0.0.0.0:8093"
+  advertise_address="${HOSTNAME}:8093"
+  session_timeout=1800
+EOF
+
 # run multi-runner
 gitlab-ci-multi-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner & pid="$!"
 
