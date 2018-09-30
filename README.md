@@ -12,8 +12,11 @@ Gitlab runner supports its own environment variables for configuration, so any o
 
 ### Required Variables
 
-- `GITLAB_HOST` Hostname/IP address:port of your Gitlab server
-- `S3_HOST` Hostname/IP address:port of your Amazon S3 or compatible object storage server
+- `GITLAB_SERVER` Hostname/IP address:port of your Gitlab server
+
+### Other Environment Variables
+
+Please see the file `syntax.md` for other environment variables that can be passed to the runner.
 
 ## Docker secrets
 
@@ -48,8 +51,7 @@ services:
     gitlab-runner:
         image: velocityorg/docker-gitlab-runner:latest
         environment:
-            - GITLAB_HOST=https://my.cool.gitlab.server.com
-            - S3_HOST=127.0.0.1:9000
+            - GITLAB_SERVER=https://my.cool.gitlab.server.com
         volumes:
             - '/var/run/docker.sock:/var/run/docker.sock'
         networks:
