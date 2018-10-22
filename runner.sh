@@ -78,10 +78,6 @@ if [[ -r "${secrets_dir}/s3_secret_key" ]]; then
     export CACHE_S3_SECRET_KEY=$(<"${secrets_dir}/s3_secret_key")
 fi
 
-# setup handlers
-# on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
-trap 'kill ${!}; term_handler' SIGTERM
-
 # Register runner in non-interactive mode
 # All options are set via environment variables
 gitlab-runner register -n -u ${gitlab_server}
@@ -92,13 +88,9 @@ gitlab-runner register -n -u ${gitlab_server}
 #token=$(grep token "/etc/gitlab-runner/config.toml" | awk '{print $3}' | tr -d '"')
 get_token
 
-# Add additional settings to config.toml
-#cat << EOF >> /etc/gitlab-runner/config.toml
-#[session_server]
-#  listen_address="0.0.0.0:8093"
-#  advertise_address="${HOSTNAME}:8093"
-#  session_timeout=1800
-#EOF
+# setup handlers
+# on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
+trap 'kill ${!}; term_handler' SIGTERM
 
 # run multi-runner
 gitlab-ci-multi-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner & pid="$!"

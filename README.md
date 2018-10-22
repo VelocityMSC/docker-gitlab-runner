@@ -39,9 +39,6 @@ File-based secrets may instead be used, but this is not recommended if you store
 
 If you want to use this image without a Docker swarm, then you cannot use Docker secrets. An alternative in this mode is to create a `docker-compose.override.yaml` file and specif sensitive data that way. This override file should NOT be committed to any version control system. An example compose override file could look like the following:
 
-```
-```
-
 ## Example Docker swarm stack configuration
 
 ```
