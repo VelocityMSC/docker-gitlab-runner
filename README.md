@@ -1,9 +1,9 @@
-# Velocity.org Gitlab Runner
+# Velocity.org Gitlab Runner 11.4.0
 https://hub.docker.com/r/velocityorg/docker-gitlab-runner/
 
 Gitlab runner that uses Docker swarm with Amazon S3/Minio distributed cache server support
 
-## Supported tags and respective `Dockerfile` links
+## Supported tags and `Dockerfile` links
 - [`latest` (*latest/Dockerfile*)](https://github.com/velocityorg/docker-gitlab-runner/blob/master/latest/Dockerfile)
 
 ## Environment Variables
@@ -42,7 +42,7 @@ If you want to use this image without a Docker swarm, then you cannot use Docker
 ## Example Docker swarm stack configuration
 
 ```
-version: '3.2'
+version: '3.3'
 
 services:
     gitlab-runner:
