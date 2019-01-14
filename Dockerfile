@@ -1,4 +1,4 @@
-FROM gitlab/gitlab-runner:v11.2.1
+FROM gitlab/gitlab-runner:v11.6.0
 
 MAINTAINER Steven Cook <scook@velocity.org>
 
@@ -7,8 +7,7 @@ RUN apt-get -y update \
     && apt-get -y install python python-toml
 
 COPY runner.sh /
-COPY runner.py /
 
-RUN chmod +x /runner.sh && chmod +x /runner.py
+RUN chmod +x /runner.sh
 
 ENTRYPOINT /runner.sh
