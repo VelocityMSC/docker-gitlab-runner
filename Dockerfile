@@ -1,4 +1,4 @@
-FROM gitlab/gitlab-runner:v11.4.2
+FROM gitlab/gitlab-runner:v11.6.0
 
 MAINTAINER Steven Cook <scook@velocity.org>
 

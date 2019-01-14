@@ -40,12 +40,6 @@ fi
 #                                                                      #
 ########################################################################
 
-# Gets runner token from config file
-# This is necessary when unregistering the runner
-function get_token () {
-    token=$(grep token "/etc/gitlab-runner/config.toml" | awk '{print $3}' | tr -d '"')
-}
-
 # SIGTERM-handler
 # Unregisters Gitlab on process SIGTERM
 function term_handler() {
@@ -85,8 +79,7 @@ gitlab-runner register -n -u ${gitlab_server}
 # Note: /etc/gitlab-runner/config.toml is dynamically generated from the arguments specified during runner registration
 
 # Set runner token in $token
-#token=$(grep token "/etc/gitlab-runner/config.toml" | awk '{print $3}' | tr -d '"')
-get_token
+token=$(grep token "/etc/gitlab-runner/config.toml" | awk '{print $3}' | tr -d '"')
 
 # setup handlers
 # on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
