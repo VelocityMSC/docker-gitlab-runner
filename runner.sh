@@ -10,14 +10,14 @@ secrets_dir="/var/run/secrets"
 # Other vars
 # You shouldn't change these unless you know what you're doing
 pid=0
-token=()
+token=""
 
 # ENVIRONMENT CHECK ####################################################
 
 if ! [[ ${GITLAB_SERVER} =~ ^https?:// ]]; then
-    gitlab_server="http://${GITLAB_SERVER}"
+    server="http://${GITLAB_SERVER}"
 else
-    gitlab_server="${GITLAB_SERVER}"
+    server="${GITLAB_SERVER}"
 fi
 
 # Set default environment vars/runner options
@@ -48,7 +48,7 @@ function term_handler() {
         wait "$pid"
     fi
 
-    gitlab-runner unregister -u ${gitlab_server} -t ${token}
+    gitlab-runner unregister -u "${server}" -t "${token}"
 
     exit 143; # 128 + 15 -- SIGTERM
 }
@@ -61,20 +61,26 @@ function term_handler() {
 
 # Docker secrets
 if [[ -r "${secrets_dir}/gitlab_registration_token" ]]; then
-    export REGISTRATION_TOKEN=$(<"${secrets_dir}/gitlab_registration_token")
+    REGISTRATION_TOKEN=$(<"${secrets_dir}/gitlab_registration_token")
+
+    export REGISTRATION_TOKEN
 fi
 
 if [[ -r "${secrets_dir}/s3_access_key" ]]; then
-    export S3_ACCESS_KEY=$(<"${secrets_dir}/s3_access_key")
+    S3_ACCESS_KEY=$(<"${secrets_dir}/s3_access_key")
+
+    export S3_ACCESS_KEY
 fi
 
 if [[ -r "${secrets_dir}/s3_secret_key" ]]; then
-    export S3_SECRET_KEY=$(<"${secrets_dir}/s3_secret_key")
+    S3_SECRET_KEY=$(<"${secrets_dir}/s3_secret_key")
+
+    export S3_SECRET_KEY
 fi
 
 # Register runner in non-interactive mode
 # All options are set via environment variables
-gitlab-runner register -n -u ${gitlab_server}
+gitlab-runner register -n -u "${server}"
 
 # Note: /etc/gitlab-runner/config.toml is dynamically generated from the arguments specified during runner registration
 
