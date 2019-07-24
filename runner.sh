@@ -67,15 +67,15 @@ if [[ -r "${secrets_dir}/gitlab_registration_token" ]]; then
 fi
 
 if [[ -r "${secrets_dir}/s3_access_key" ]]; then
-    S3_ACCESS_KEY=$(<"${secrets_dir}/s3_access_key")
+    CACHE_S3_ACCESS_KEY=$(<"${secrets_dir}/s3_access_key")
 
-    export S3_ACCESS_KEY
+    export CACHE_S3_ACCESS_KEY
 fi
 
 if [[ -r "${secrets_dir}/s3_secret_key" ]]; then
-    S3_SECRET_KEY=$(<"${secrets_dir}/s3_secret_key")
+    CACHE_S3_SECRET_KEY=$(<"${secrets_dir}/s3_secret_key")
 
-    export S3_SECRET_KEY
+    export CACHE_S3_SECRET_KEY
 fi
 
 # Register runner in non-interactive mode
