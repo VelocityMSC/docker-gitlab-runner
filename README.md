@@ -1,4 +1,4 @@
-# Velocity.org Gitlab Runner 12.8.0
+# Velocity.org Gitlab Runner 12.9.0
 https://hub.docker.com/r/velocityorg/docker-gitlab-runner/
 
 Gitlab multi-runner stack deployable on a Docker swarm
