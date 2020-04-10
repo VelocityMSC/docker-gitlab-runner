@@ -1,4 +1,4 @@
-FROM gitlab/gitlab-runner:v12.5.0
+FROM gitlab/gitlab-runner:v12.6.0
 MAINTAINER Steven Cook <scook@velocity.org>
 
 RUN apt-get -y update && \

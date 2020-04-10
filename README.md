@@ -1,4 +1,4 @@
-# Velocity.org Gitlab Runner 12.5.0
+# Velocity.org Gitlab Runner 12.6.0
 https://hub.docker.com/r/velocityorg/docker-gitlab-runner/
 
 Gitlab multi-runner stack deployable on a Docker swarm
@@ -46,7 +46,7 @@ If you want to use this image without a Docker swarm, then you cannot use Docker
 ## Example Docker swarm stack configuration
 
 ```
-version: '3.5'
+version: '3.7'
 
 services:
     gitlab-runner:
